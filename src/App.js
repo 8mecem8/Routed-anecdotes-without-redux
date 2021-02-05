@@ -1,15 +1,50 @@
 import React, { useState } from 'react'
+import {
+  BrowserRouter as Router,
+  Switch, Route, Link, useParams,useHistory
+} from "react-router-dom"
 
-const Menu = () => {
+
+
+
+
+
+
+const Menu = ({addNew,anecdotes}) => {
+
+console.log('anecdotes is ======',anecdotes)
+
+
+
   const padding = {
     paddingRight: 5
   }
   return (
+    <Router>
+    <>
     <div>
-      <a href='#' style={padding}>anecdotes</a>
-      <a href='#' style={padding}>create new</a>
-      <a href='#' style={padding}>about</a>
+      <Link href='#' style={padding} to="/">Home</Link>
+      <Link href='#' style={padding} to="/Create">create new</Link>
+      <Link href='#' style={padding} to="/About">about</Link>
     </div>
+
+        
+     <Switch>
+        <Route path="/anecdotes/:id">
+          <AnecdoteSingle anecdotes={anecdotes} />
+          </Route>
+        <Route path="/create">
+          <CreateNew addNew={addNew} />
+        </Route>
+        <Route path="/About">
+          <About />
+        </Route>
+        <Route path="/">
+          <AnecdoteList anecdotes={anecdotes} />
+        </Route>
+      </Switch>
+</>
+</Router>
   )
 }
 
@@ -17,10 +52,26 @@ const AnecdoteList = ({ anecdotes }) => (
   <div>
     <h2>Anecdotes</h2>
     <ul>
-      {anecdotes.map(anecdote => <li key={anecdote.id} >{anecdote.content}</li>)}
+      {anecdotes.map(anecdote => <li key={anecdote.id} > <Link to={`/anecdotes/${anecdote.id}`}>{anecdote.content}</Link></li>)}
     </ul>
   </div>
 )
+
+
+const AnecdoteSingle = ({ anecdotes }) => {
+  const id = useParams().id
+  const anecdoteById = anecdotes.find(a => a.id === id)
+  
+  
+    return (
+  <div>
+    <h3>{anecdoteById.content}</h3>
+    <p>Has {anecdoteById.votes}</p>
+    <p>For more information please see <a href={anecdoteById.info}>{anecdoteById.info}</a></p>
+  </div>
+  )}
+
+
 
 const About = () => (
   <div>
@@ -38,7 +89,7 @@ const About = () => (
 
 const Footer = () => (
   <div>
-   This part for Footer
+   This part for Footer,  example ==> "© 2021 American Motor Co., Inc. All information contained herein applies to U.S. products only."
   </div>
 )
 
@@ -46,9 +97,11 @@ const CreateNew = (props) => {
   const [content, setContent] = useState('')
   const [author, setAuthor] = useState('')
   const [info, setInfo] = useState('')
-
+const history = useHistory()
 
   const handleSubmit = (e) => {
+    history.push('/')
+    
     e.preventDefault()
     props.addNew({
       content,
@@ -56,6 +109,8 @@ const CreateNew = (props) => {
       info,
       votes: 0
     })
+
+    
   }
 
   return (
@@ -82,6 +137,7 @@ const CreateNew = (props) => {
 }
 
 const App = () => {
+  
   const [anecdotes, setAnecdotes] = useState([
     {
       content: 'If it hurts, do it more often',
@@ -106,8 +162,7 @@ const App = () => {
     setAnecdotes(anecdotes.concat(anecdote))
   }
 
-  const anecdoteById = (id) =>
-    anecdotes.find(a => a.id === id)
+const anecdoteById = (id) =>anecdotes.find(a => a.id === id)
 
   const vote = (id) => {
     const anecdote = anecdoteById(id)
@@ -123,10 +178,8 @@ const App = () => {
   return (
     <div>
       <h1>Software anecdotes</h1>
-      <Menu />
-      <AnecdoteList anecdotes={anecdotes} />
-      <About />
-      <CreateNew addNew={addNew} />
+      <Menu anecdotes={anecdotes} addNew={addNew} />
+      
       <Footer />
     </div>
   )
